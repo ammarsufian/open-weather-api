@@ -17,18 +17,21 @@ class OpenWeatherApiService
         ]);
     }
 
-    public function getCityWeather($city)
+    public function getCityWeather(array $data)
     {
-       $response = $this->client->get('weather', [
+        $response = $this->client->get('weather', [
             'query' => [
-                'q' => $city,
+                'q' => data_get($data,'city'),
+                'lat'=> data_get($data,'lat'),
+                'lon' =>data_get($data,'lon'),
                 'appid' => config('services.openWeatherMap.api_key'),
             ]
         ]);
+
         $weatherData = json_decode($response->getBody(), true);
-        // Store the weather data in the database
-        WeatherData::updateOrCreate(['city'=> $city],[
-            'data' => $weatherData,
+
+        WeatherData::updateOrCreate(['city' =>  data_get($data,'city')], [
+            'data' => $response->getBody(),
         ]);
 
         return $weatherData;
